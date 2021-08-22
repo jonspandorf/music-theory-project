@@ -10,6 +10,7 @@ const Listening = () => {
     const directions = ['up', 'down']
     const intTypes = ['minor', 'Major', 'diminished', 'Augmented']
     const intSizeList = [1, 2, 3, 4, 5, 6, 7, 8]
+    const synth = new Tone.Synth().toDestination();
 
     const exerNotes = ["A4", "G4", "D4", "F#4", "E4"]
 
@@ -19,21 +20,26 @@ const Listening = () => {
     let time = 0;
 
     useEffect(()=> {
-        console.log(notation)
         console.log(notes)
         if (notes) {
             console.log(notation)
         }
     }, [notes])
 
-    const handleDrill = () => {
-        const synth = new Tone.Synth().toDestination();
-        const now = Tone.now();
+
+    const renderExercise = (time) => {
+        console.log('rendering')
         exerNotes.forEach(note => {
-            synth.triggerAttackRelease(note, "8n", now + time);
-            time = time + 0.5;
-            notes = notes + note + ' ';
+            synth.triggerAttackRelease(note, "4n", time)
+
         })
+    }
+
+    const handleDrill = () => {
+        Tone.Transport.bpm.value = 60;
+        Tone.Transport.timeSignature = 4;
+        Tone.Transport.scheduleOnce(renderExercise(), Tone.now())
+
     }
 
     const chooseIntSize = (e) => {
