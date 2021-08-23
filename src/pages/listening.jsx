@@ -6,11 +6,13 @@ import * as Tone from 'tone'
 
 const Listening = () => {
     const [intSize, setIntSize] = useState(0)
+    let counter = 0;
 
     const directions = ['up', 'down']
     const intTypes = ['minor', 'Major', 'diminished', 'Augmented']
     const intSizeList = [1, 2, 3, 4, 5, 6, 7, 8]
-    const synth = new Tone.Synth().toDestination();
+    const AMinorScale = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+
 
     const exerNotes = ["A4", "G4", "D4", "F#4", "E4"]
 
@@ -27,19 +29,56 @@ const Listening = () => {
     }, [notes])
 
 
-    const renderExercise = (time) => {
+    const render = (time) => {
         console.log('rendering')
-        exerNotes.forEach(note => {
-            synth.triggerAttackRelease(note, "4n", time)
 
+        if (counter - exerNotes.length - 1) {
+            synth.triggerAttackRelease(exerNotes[counter], "4n", time)
+            counter++;
+        } else {
+            Tone.Transport.stop();
+        }
+
+    }
+    const mapped = [];
+
+    const addOctaveNumbers = (scale, octaveNumber) => {
+        scale.forEach(note => {
+            const firstOctaveNoteIndex = scale.indexOf('C') !== -1 ? scale.indexOf('C') : scale.indexOf('C#');
+            const noteOctaveNumber = scale.indexOf(note) < firstOctaveNoteIndex ? octaveNumber - 1 : octaveNumber; 
+            const noteToReturn = `${note}${noteOctaveNumber}`
+            mapped.push(noteToReturn)
         })
     }
 
-    const handleDrill = () => {
-        Tone.Transport.bpm.value = 60;
-        Tone.Transport.timeSignature = 4;
-        Tone.Transport.scheduleOnce(renderExercise(), Tone.now())
 
+
+    const synth = new Tone.Synth().toDestination();
+
+    addOctaveNumbers(AMinorScale, 4);
+
+    exerNotes.forEach((note, index) => {
+        synth.triggerAttackRelease(note, '4n', index + 1)
+    })
+
+
+    const handleDrill = () => {
+        // Tone.Transport.bpm.value = 60;
+        // Tone.Transport.timeSignature = 4;
+        // for (let i = 0; i < exerNotes.length; i++) {
+        //     Tone.Transport.scheduleOnce((time) => {
+        //         synth.triggerAttackRelease(exerNotes[i], "8n", time) 
+        //     }, "2n")
+        // }
+        Tone.Transport.bpm.value = 150
+
+        console.log('start')
+        console.log(Tone.Transport.state)
+        if (Tone.Transport.state !== 'started') {
+            Tone.start();
+          } else {
+            Tone.Transport.stop();
+          }
     }
 
     const chooseIntSize = (e) => {
